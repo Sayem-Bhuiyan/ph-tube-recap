@@ -1,9 +1,18 @@
 const btnContainer = document.getElementById('btn-container');
 const cardContainer = document.getElementById('card-container');
 const errorElement = document.getElementById('error-element');
+const sortBtn = document.getElementById('sort-btn')
+
 
 
 let selectedCategor = 1000;
+let sortByView = false;
+
+sortBtn.addEventListener('click', () => {
+    sortByView = true;
+    fetchDataByCategories(selectedCategor, sortByView)
+})
+
 
 const fetchCategories = async () => {
     const url = 'https://openapi.programming-hero.com/api/videos/categories';
@@ -30,12 +39,25 @@ const fetchCategories = async () => {
 }
 
 
-const fetchDataByCategories = async (categoryId) => {
+const fetchDataByCategories = async (categoryId, sortByView) => {
     selectedCategor = categoryId;
     const url = `https://openapi.programming-hero.com/api/videos/category/${categoryId}`;
     const res = await fetch(url);
     const data = await res.json();
     const videoData = data.data;
+
+    if(sortByView){
+        videoData.sort((a, b)  => {
+            const totalViewsStrFirst = a.others?.views;
+            const totalViewsStrSecond = b.others?.views;
+
+            const totalViewsFirstNumber = parseFloat(totalViewsStrFirst.replace('K', '') || 0)
+            const totalViewsSecondNumber = parseFloat(totalViewsStrSecond.replace('K', '') || 0)
+
+            return totalViewsSecondNumber - totalViewsFirstNumber;
+        })
+    }
+
     if(videoData.length === 0){
         errorElement.classList.remove('hidden')
     }
@@ -86,4 +108,4 @@ const fetchDataByCategories = async (categoryId) => {
 
 
 fetchCategories()
-fetchDataByCategories(selectedCategor)
+fetchDataByCategories(selectedCategor, sortByView)
